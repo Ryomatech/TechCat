@@ -3,7 +3,7 @@
 
 
 # 作った機能
-分子量を計算するプログラム(molcalapp.py)
+* 分子量を計算するプログラム(molcalapp.py)
 
 
 
@@ -16,11 +16,4 @@
 # Usage
 pyinstallerでbuildできるはず
 
-# Note
 
-
-"hoge" is under [MIT license](https://en.wikipedia.org/wiki/MIT_License).
-
-社内向けなら社外秘であることを明示してる
-
-"hoge" is Confidential.
