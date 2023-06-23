@@ -3,6 +3,7 @@ import re
 import os
 import sys
 
+
 def resource_path(relative_path):
     if hasattr(sys, '_MEIPASS'):
         return os.path.join(sys._MEIPASS, relative_path)
@@ -20,7 +21,7 @@ def csv_to_dictionary(filename):
     return dictionary
 
 def atwei():
-    file_path = resource_path("AtomicWeight.csv")
+    file_path = 'statics/AtomicWeight.csv'
     AtomicWeight = csv_to_dictionary(file_path)
     return AtomicWeight
 
