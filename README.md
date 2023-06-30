@@ -4,6 +4,7 @@
 
 # 作った機能
 * 分子量を計算するプログラム(molcalapp.py)
+* matplotでグラフを作成するプログラム(graphmain.py)
 
 
 
