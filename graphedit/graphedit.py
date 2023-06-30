@@ -4,7 +4,7 @@ import scienceplots
 import pandas as pd
 
 
-save_file_name="aaaa.png"
+
 
 plt.rcParams['font.family'] = 'Hiragino Maru Gothic Pro'
 plt.rcParams['figure.figsize'] = (6, 4)
@@ -23,17 +23,22 @@ def df_value():
 
 
 
-def main(x,y):
+def main(x,y,X_name,Y_name,X_min,X_max,Y_min,Y_max,X_orlog,Y_orlog,legend_oron,save_file_name,file_dpi):
     fig, ax = plt.subplots()
     with plt.style.context(['science','ieee',"no-latex"]):
-        ax.plot(x,y,marker=".",linestyle="-", color="purple",label='aaa')
-        ax.set_xlim(min(x), max(x))
-        ax.set_ylim(min(y),max(y))
-        ax.set_xlabel("あ",fontsize=15)
-        ax.set_ylabel(ylabel='うう',fontsize=15) 
-        ax.legend(fontsize=15)
+        ax.plot(x,y,marker=".",linestyle="-", color="purple",label='Element1')
+        ax.set_xlim(X_min, X_max)
+        ax.set_ylim(Y_min,Y_max)
+        ax.set_xlabel(X_name,fontsize=15)
+        ax.set_ylabel(Y_name,fontsize=15) 
+        if legend_oron=='on':
+            ax.legend(fontsize=15)
+        if X_orlog == 'log':
+            ax.set_xscale("log")
+        if Y_orlog == 'log':
+            ax.set_yscale("log")
         #plt.show()
-        fig.savefig(save_file_name) 
+        fig.savefig(save_file_name,dpi=file_dpi) 
         #return fig
 
 
