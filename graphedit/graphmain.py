@@ -14,7 +14,10 @@ def load_csv():
     file_path = filedialog.askopenfilename(filetypes=[("CSV Files", "*.csv")])
     if file_path:
         # CSVファイルを読み込む
-        data = pd.read_csv(file_path,names=('x','y'))
+        data = pd.read_csv(file_path)
+        column_count = data.shape[1]
+        names = ['column{}'.format(i) for i in range(column_count)]
+        data = pd.read_csv(file_path,names=names)
         global df
         df = data
 
@@ -86,12 +89,26 @@ def data_row_select():
     data_row_window.mainloop()
 
 def generate_graph():
-    graphedit.main(df[df.columns[x_index]],df[df.columns[y_index]],X_name_entry.get(),Y_name_entry.get(),int(X_min_entry.get()),int(X_max_entry.get()),int(Y_min_entry.get()),int(Y_max_entry.get()),X_axis_var.get(),Y_axis_var.get(),legend_var.get(),"result.png",100)
+    if X_min_entry.get().isdigit():
+        X_min=int(X_min_entry.get())
+        X_max=int(X_max_entry.get())
+    else:
+        X_min=float(X_min_entry.get())
+        X_max=float(X_max_entry.get())
+    if Y_min_entry.get().isdigit():
+        Y_min=int(Y_min_entry.get())
+        Y_max=int(Y_max_entry.get())
+    else:
+        Y_min=float(Y_min_entry.get())
+        Y_max=float(Y_max_entry.get())
+    graphedit.main(df[df.columns[x_index]],df[df.columns[y_index]],X_name_entry.get(),Y_name_entry.get(),X_min,X_max,Y_min,Y_max,X_axis_var.get(),Y_axis_var.get(),legend_var.get(),"result.png",100)
     update_label()
 
 
 
 def quit_program():
+    if os.path.exists('result.png'):
+        os.remove('result.png')
     sys.exit(1)
 
 def dirdialog_ask():
