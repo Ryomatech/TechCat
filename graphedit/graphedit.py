@@ -23,10 +23,16 @@ def df_value():
 
 
 
-def main(x,y,X_name,Y_name,X_min,X_max,Y_min,Y_max,X_orlog,Y_orlog,legend_oron,save_file_name,file_dpi):
+def main(data,x_index,y_indexs,X_name,Y_name,X_min,X_max,Y_min,Y_max,X_orlog,Y_orlog,legend_oron,save_file_name,file_dpi,element_names,element_points,element_lines):
+    x=data[data.columns[x_index]]
+    if len(y_indexs) == 1:
+        colors = ['black']
+    else:
+        colors = ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2']
     fig, ax = plt.subplots()
     with plt.style.context(['science','ieee',"no-latex"]):
-        ax.plot(x,y,marker=".",linestyle="-", color="purple",label='Element1')
+        for i in range(len(y_indexs)):
+            ax.plot(x,data[data.columns[y_indexs[i]]],marker=element_points[i],linestyle=element_lines[i], color=colors[i],label=element_names[i])
         ax.set_xlim(X_min, X_max)
         ax.set_ylim(Y_min,Y_max)
         ax.set_xlabel(X_name,fontsize=15)
