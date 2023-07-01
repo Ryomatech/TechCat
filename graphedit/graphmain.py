@@ -14,21 +14,36 @@ def load_csv():
     file_path = filedialog.askopenfilename(filetypes=[("CSV Files", "*.csv")])
     if file_path:
         # CSVファイルを読み込む
-        data = pd.read_csv(file_path,names=('x','y'))
+        data = pd.read_csv(file_path)
+        column_count = data.shape[1]
+        names = ['column{}'.format(i) for i in range(column_count)]
+        data = pd.read_csv(file_path,names=names)
         global df
         df = data
 
 def close_data_row_window():
     global click_count
+    global element_names
+    global element_points
+    global element_lines
+    element_names = ['']* len(y_indexs)
+    element_points = ['']* len(y_indexs)
+    element_lines = ['-']* len(y_indexs)
     X_min_entry.delete(0, "end")
     X_max_entry.delete(0, "end")
     Y_min_entry.delete(0, "end")
     Y_max_entry.delete(0, "end")
-
+    y_min=1000000
+    y_max=-1000000
+    for y_index in y_indexs:
+        if df[df.columns[y_index]].min()<y_min:
+            y_min=df[df.columns[y_index]].min()
+        if df[df.columns[y_index]].max()>y_max:
+            y_max=df[df.columns[y_index]].max()
     X_min_entry.insert(0, str(df[df.columns[x_index]].min())[:5]) 
     X_max_entry.insert(0, str(df[df.columns[x_index]].max())[:5]) 
-    Y_min_entry.insert(0, str(df[df.columns[y_index]].min())[:5]) 
-    Y_max_entry.insert(0, str(df[df.columns[y_index]].max())[:5]) 
+    Y_min_entry.insert(0, str(y_min)[:5]) 
+    Y_max_entry.insert(0, str(y_max)[:5]) 
     click_count=0
     data_row_window.destroy()
 
@@ -37,23 +52,21 @@ def remove_result_png():
         os.remove('result.png')
 
 
-
-
-
 def change_label_color(event):
         global click_count
         global x_index
-        global y_index
+        global y_indexs
         current_label = event.widget  # イベントが発生したラベルを取得
         label_index = labels.index(current_label) 
         if click_count==0:
             event.widget.config(background="#ffb6c1")
-            x_index = label_index
+            x_index=label_index
         elif click_count==1:
             event.widget.config(background="#b0c4de")
-            y_index = label_index
-        else:
-            event.widget.config(background="#ffffff")
+            y_indexs=[label_index]
+        else :
+            event.widget.config(background="#b0c4de")
+            y_indexs.append(label_index)
         click_count += 1
 
 
@@ -70,6 +83,7 @@ def data_row_select():
         column_count = df.shape[1]
         for i, column in enumerate(df.columns):
             values = df[column].tolist()
+            values = values[:30] 
             values_str = "\n".join(str(value) for value in values)
             label='label'+str(i)
             label = tk.Label(data_row_window, text=f"{column}\n{values_str}",bd=0.5,highlightthickness=0,relief="solid",background='#ffffff')
@@ -79,19 +93,84 @@ def data_row_select():
     else:                                                       
         label = tk.Label(data_row_window, text='csvファイルを選択してね', justify='left')
         label.grid(row=1, column=0)
-
     close_data_row_window_button = tk.Button(data_row_window, text="閉じる",command=close_data_row_window)
     close_data_row_window_button.config(width=5, height=1, bg="#444654", fg="#444654", bd=0, relief="flat", activebackground="#555555", activeforeground="#444654",cursor="hand")
     close_data_row_window_button.grid(row=1, column=column_count,padx=6, pady=10,ipady=10,sticky=tk.N)
     data_row_window.mainloop()
 
+def elements_setting_window():
+    global elements_setting
+    global entry_list
+    global var_list
+    elements_setting=tk.Toplevel()
+    elements_setting.title("")
+    elements_setting.overrideredirect(False)
+    elements_setting.geometry("210x350")
+    elements_setting.configure(bg="#444654")
+    element_window_label=tk.Label(elements_setting,text="要素設定",bd=0.5,font=("",25),bg="#444654",fg='#fefefe',highlightthickness=0, justify="center",relief="flat") 
+    element_window_label.grid(row=0,column=0)
+    entry_list = []
+    var_list = []
+    for i in range(len(y_indexs)):
+        element_number_label=tk.Label(elements_setting,text="要素"+str(i+1),bd=0.5,font=("",20),bg="#444654",fg='#fefefe',highlightthickness=0, justify="center",relief="flat")
+        element_number_label.grid(row=3*i+1,column=0,columnspan=2)
+        element_name_label=tk.Label(elements_setting,text="要素名",bd=0.5,font=("",14),bg="#444654",fg='#fefefe',highlightthickness=0, justify="center",relief="flat")
+        element_name_label.grid(row=3*i+2,column=0,sticky=tk.E)
+        entry_name = tk.Entry(elements_setting,width=8)
+        entry_name.grid(row=3*i+2,column=1,columnspan=2)
+        entry_list.append(entry_name)
+        var = tk.StringVar(value="line")
+        var_list.append(var)
+        point_name='point_radio'+str(i+1)
+        point_name = tk.Radiobutton(elements_setting, text="点", variable=var, value="point",bg="#444654",fg='#fefefe')
+        point_name.grid(row=3*i+3,column=0,sticky=tk.E)
+        line_name='line_radio'+str(i+1)
+        line_name = tk.Radiobutton(elements_setting, text="線", variable=var, value="line",bg="#444654",fg='#fefefe')
+        line_name.grid(row=3*i+3,column=1)
+        point_line_name='point_line_radio'+str(i+1)
+        point_line_name = tk.Radiobutton(elements_setting, text="点と線", variable=var, value="pointline",bg="#444654",fg='#fefefe')
+        point_line_name.grid(row=3*i+3,column=2)
+    close_elements_setting_button = tk.Button(elements_setting, text="決定",command=close_element_setting)
+    close_elements_setting_button.config(width=5, height=1, bg="#444654", fg="#444654", bd=0, relief="flat", activebackground="#555555", activeforeground="#444654",cursor="hand")
+    close_elements_setting_button.grid(row=len(y_indexs)*3+1, column=0,padx=6, pady=10,ipady=10,sticky=tk.N,columnspan=2)
+    elements_setting.mainloop()
+
+def close_element_setting():
+    for i in range(len(y_indexs)):
+        element_names[i]=entry_list[i].get()
+        var_name = var_list[i].get()
+        if var_name=='point':
+            element_points[i]='.'
+            element_lines[i]=''
+        elif var_name=='line':
+            element_points[i]=''
+            element_lines[i]='-'
+        else:
+            element_points[i]='.'
+            element_lines[i]='-'
+    elements_setting.destroy()
+
 def generate_graph():
-    graphedit.main(df[df.columns[x_index]],df[df.columns[y_index]],X_name_entry.get(),Y_name_entry.get(),int(X_min_entry.get()),int(X_max_entry.get()),int(Y_min_entry.get()),int(Y_max_entry.get()),X_axis_var.get(),Y_axis_var.get(),legend_var.get(),"result.png",100)
+    if X_min_entry.get().isdigit():
+        X_min=int(X_min_entry.get())
+        X_max=int(X_max_entry.get())
+    else:
+        X_min=float(X_min_entry.get())
+        X_max=float(X_max_entry.get())
+    if Y_min_entry.get().isdigit():
+        Y_min=int(Y_min_entry.get())
+        Y_max=int(Y_max_entry.get())
+    else:
+        Y_min=float(Y_min_entry.get())
+        Y_max=float(Y_max_entry.get())
+    graphedit.main(df,x_index,y_indexs,X_name_entry.get(),Y_name_entry.get(),X_min,X_max,Y_min,Y_max,X_axis_var.get(),Y_axis_var.get(),legend_var.get(),"result.png",100,element_names,element_points,element_lines)
     update_label()
 
 
 
 def quit_program():
+    if os.path.exists('result.png'):
+        os.remove('result.png')
     sys.exit(1)
 
 def dirdialog_ask():
@@ -110,7 +189,19 @@ def save_as_pdf():
     save_file_name = save_name_entry.get()+'.pdf'
     dialog=dirdialog_ask()
     save_place=dialog+'/'+save_file_name
-    graphedit.main(df[df.columns[x_index]],df[df.columns[y_index]],X_name_entry.get(),Y_name_entry.get(),int(X_min_entry.get()),int(X_max_entry.get()),int(Y_min_entry.get()),int(Y_max_entry.get()),X_axis_var.get(),Y_axis_var.get(),legend_var.get(),"temp.png",1000)
+    if X_min_entry.get().isdigit():
+        X_min=int(X_min_entry.get())
+        X_max=int(X_max_entry.get())
+    else:
+        X_min=float(X_min_entry.get())
+        X_max=float(X_max_entry.get())
+    if Y_min_entry.get().isdigit():
+        Y_min=int(Y_min_entry.get())
+        Y_max=int(Y_max_entry.get())
+    else:
+        Y_min=float(Y_min_entry.get())
+        Y_max=float(Y_max_entry.get())
+    graphedit.main(df,x_index,y_indexs,X_name_entry.get(),Y_name_entry.get(),X_min,X_max,Y_min,Y_max,X_axis_var.get(),Y_axis_var.get(),legend_var.get(),"temp.png",1000,element_names,element_points,element_lines)
     image = Image.open('temp.png')
     image.save(save_place, "PDF", resolution=100.0, quality=100)
     os.remove('temp.png')
@@ -119,25 +210,19 @@ def save_as_png():
     save_file_name = save_name_entry.get()+'.png'
     dialog=dirdialog_ask()
     save_place=dialog+'/'+save_file_name
-    graphedit.main(df[df.columns[x_index]],df[df.columns[y_index]],X_name_entry.get(),Y_name_entry.get(),int(X_min_entry.get()),int(X_max_entry.get()),int(Y_min_entry.get()),int(Y_max_entry.get()),X_axis_var.get(),Y_axis_var.get(),legend_var.get(),save_place,1000)
-
-
-
-
-
-# Tkinterウィンドウの作成
-root = tk.Tk()
-root.title("Graph Editor")
-root.geometry("900x700")
-root.overrideredirect(False)
-#root.resizable(0, 0)    
-root.configure(bg="#444654")
-root.iconbitmap("fav    icon.ico")
-viewer_label = tk.Label(root)
-
-validation = root.register(validate_input)
-
-click_count=0
+    if X_min_entry.get().isdigit():
+        X_min=int(X_min_entry.get())
+        X_max=int(X_max_entry.get())
+    else:
+        X_min=float(X_min_entry.get())
+        X_max=float(X_max_entry.get())
+    if Y_min_entry.get().isdigit():
+        Y_min=int(Y_min_entry.get())
+        Y_max=int(Y_max_entry.get())
+    else:
+        Y_min=float(Y_min_entry.get())
+        Y_max=float(Y_max_entry.get())
+    graphedit.main(df,x_index,y_indexs,X_name_entry.get(),Y_name_entry.get(),X_min,X_max,Y_min,Y_max,X_axis_var.get(),Y_axis_var.get(),legend_var.get(),save_place,1000,element_names,element_points,element_lines)
 
 def update_label():
     image_path = "result.png"
@@ -151,6 +236,25 @@ def update_label():
         viewer_label.image = tk_image
     else:
         viewer_label.config(text='No Image',bd=0.5,font=("",50),bg="#40414f",width=19,height=7,fg='#fefefe',highlightthickness=0, justify="center",relief="solid")
+
+
+
+
+
+# Tkinterウィンドウの作成
+root = tk.Tk()
+root.title("Graph Editor")
+root.geometry("950x800")
+root.overrideredirect(False)
+#root.resizable(0, 0)    
+root.configure(bg="#444654")
+root.iconbitmap("fav    icon.ico")
+viewer_label = tk.Label(root)
+
+validation = root.register(validate_input)
+
+click_count=0
+
 
 
 
@@ -184,6 +288,10 @@ Y_axis_var = tk.StringVar(value="linear")
 Y_linear_radio = tk.Radiobutton(root, text="通常軸", variable=Y_axis_var, value="linear",bg="#444654",fg='#fefefe')
 Y_log_radio = tk.Radiobutton(root, text="対数軸", variable=Y_axis_var, value="log",bg="#444654",fg='#fefefe')
 
+element_label=tk.Label(root,text="要素設定",bd=0.5,font=("",20),bg="#444654",fg='#fefefe',highlightthickness=0, justify="center",relief="flat") 
+element_setting_button = tk.Button(root, text="詳細",command=elements_setting_window)
+
+
 legend_label=tk.Label(root,text="凡例設定",bd=0.5,font=("",20),bg="#444654",fg='#fefefe',highlightthickness=0, justify="center",relief="flat") 
 legend_var = tk.StringVar(value="on")
 legend_on_radio = tk.Radiobutton(root, text="凡例あり", variable=legend_var, value="on",bg="#444654",fg='#fefefe')
@@ -204,12 +312,12 @@ generate_button.config(width=5, height=1, bg="#444654", fg="#444654", bd=0, reli
 quit_button.config(width=5, height=1, bg="#444654", fg="#444654", bd=0, relief="flat", activebackground="#555555", activeforeground="#444654",cursor="hand")
 PDF_save_button.config(width=7, height=1, bg="#444654", fg="#444654", bd=0, relief="flat", activebackground="#555555", activeforeground="#444654",cursor="hand")
 PNG_save_button.config(width=7, height=1, bg="#444654", fg="#444654", bd=0, relief="flat", activebackground="#555555", activeforeground="#444654",cursor="hand")
-
+element_setting_button.config(width=5, height=1, bg="#444654", fg="#444654", bd=0, relief="flat", activebackground="#555555", activeforeground="#444654",cursor="hand")
 
 
 csv_file_button.grid(row=0, column=5, padx=6, pady=10,ipady=10)
 data_row_select_button.grid(row=0, column=6, padx=6, pady=10,ipady=10)
-viewer_label.grid(row=1, column=0, padx=6, pady=10,ipady=0,columnspan=10,rowspan=40)
+viewer_label.grid(row=1, column=0, padx=6, pady=10,ipady=0,columnspan=10,rowspan=40,sticky=tk.N)
 
 
 X_label.grid(row=1, column=11, padx=6, pady=10,ipady=0)
@@ -233,14 +341,17 @@ Y_max_entry.grid(row=18, column=14)
 Y_linear_radio.grid(row=19, column=11)
 Y_log_radio.grid(row=20, column=11)
 
-legend_label.grid(row=22, column=11, padx=6, pady=10,ipady=0)
-legend_on_radio.grid(row=23, column=11)
-legend_off_radio.grid(row=24, column=11)
+element_label.grid(row=22, column=11, padx=6, pady=10,ipady=0)
+element_setting_button.grid(row=23, column=11, padx=6, pady=0,ipady=10)
 
-save_label.grid(row=30, column=11)
-save__name_label.grid(row=31, column=11,sticky=tk.E)
-save_name_entry.grid(row=31, column=12)
-save__type_label.grid(row=31, column=13,sticky=tk.SW)
+legend_label.grid(row=34, column=11, padx=6, pady=10,ipady=0)
+legend_on_radio.grid(row=35, column=11)
+legend_off_radio.grid(row=36, column=11)
+
+save_label.grid(row=37, column=11)
+save__name_label.grid(row=38, column=11,sticky=tk.E)
+save_name_entry.grid(row=38, column=12)
+save__type_label.grid(row=38, column=13,sticky=tk.SW)
 
 
 generate_button.grid(row=41, column=0,padx=6, pady=10,ipady=10)
