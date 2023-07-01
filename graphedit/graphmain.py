@@ -58,13 +58,25 @@ def change_label_color(event):
         global y_indexs
         current_label = event.widget  # イベントが発生したラベルを取得
         label_index = labels.index(current_label) 
+        Element_text_str=Element_colomn_label.cget("text")
+        Element_text=Element_text_str.split('=')
         if click_count==0:
+            Element_text.insert(1,'=Column'+str(label_index))
+            Element_text.insert(3,'=')
+            Element_colomn_label.config(text=''.join(Element_text))
             event.widget.config(background="#ffb6c1")
             x_index=label_index
         elif click_count==1:
+            Element_text.insert(2,'=Column'+str(label_index))
+            Element_text.insert(1,'=')
+            Element_colomn_label.config(text=''.join(Element_text))
             event.widget.config(background="#b0c4de")
             y_indexs=[label_index]
         else :
+            Element_text.insert(click_count+1,'\n'+'y'+str(click_count)+'=Column'+str(label_index))
+            for i in range(click_count):
+                Element_text.insert(2*i+1,'=')
+            Element_colomn_label.config(text=''.join(Element_text))
             event.widget.config(background="#b0c4de")
             y_indexs.append(label_index)
         click_count += 1
@@ -74,6 +86,7 @@ def data_row_select():
     global labels
     labels=[]
     global data_row_window
+    global Element_colomn_label
     data_row_window = tk.Toplevel()
     data_row_window.title("")
     data_row_window.overrideredirect(False)
@@ -87,15 +100,17 @@ def data_row_select():
             values_str = "\n".join(str(value) for value in values)
             label='label'+str(i)
             label = tk.Label(data_row_window, text=f"{column}\n{values_str}",bd=0.5,highlightthickness=0,relief="solid",background='#ffffff')
-            label.grid(row=1, column=i)
+            label.grid(row=1, column=i,rowspan=1000)
             label.bind("<Button-1>", change_label_color)
             labels.append(label) 
     else:                                                       
-        label = tk.Label(data_row_window, text='csvファイルを選択してね', justify='left')
-        label.grid(row=1, column=0)
-    close_data_row_window_button = tk.Button(data_row_window, text="閉じる",command=close_data_row_window)
+        No_file_label = tk.Label(data_row_window, text='csvファイルを選択してね', justify='left')
+        No_file_label.grid(row=1, column=0)
+    close_data_row_window_button = tk.Button(data_row_window, text="決定",command=close_data_row_window)
     close_data_row_window_button.config(width=5, height=1, bg="#444654", fg="#444654", bd=0, relief="flat", activebackground="#555555", activeforeground="#444654",cursor="hand")
     close_data_row_window_button.grid(row=1, column=column_count,padx=6, pady=10,ipady=10,sticky=tk.N)
+    Element_colomn_label = tk.Label(data_row_window, text='x='+"\n"+'y1=', justify='left',font=("",20),bg="#444654",fg='#fefefe',highlightthickness=0,relief="flat")
+    Element_colomn_label.grid(row=2, column=column_count,padx=6,sticky=tk.W)
     data_row_window.mainloop()
 
 def elements_setting_window():
