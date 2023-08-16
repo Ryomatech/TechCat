@@ -195,7 +195,7 @@ def dirdialog_ask():
 
 
 def validate_input(text):
-    if len(text) <= 5:
+    if len(text) <= 7:
         return True
     else:
         return False
@@ -204,6 +204,7 @@ def save_as_pdf():
     save_file_name = save_name_entry.get()+'.pdf'
     dialog=dirdialog_ask()
     save_place=dialog+'/'+save_file_name
+    current_path= os.getcwd()+'/'+save_file_name
     if X_min_entry.get().isdigit():
         X_min=int(X_min_entry.get())
         X_max=int(X_max_entry.get())
@@ -216,10 +217,12 @@ def save_as_pdf():
     else:
         Y_min=float(Y_min_entry.get())
         Y_max=float(Y_max_entry.get())
-    graphedit.main(df,x_index,y_indexs,X_name_entry.get(),Y_name_entry.get(),X_min,X_max,Y_min,Y_max,X_axis_var.get(),Y_axis_var.get(),legend_var.get(),"temp.png",1000,element_names,element_points,element_lines)
-    image = Image.open('temp.png')
-    image.save(save_place, "PDF", resolution=100.0, quality=100)
-    os.remove('temp.png')
+    #graphedit.main(df,x_index,y_indexs,X_name_entry.get(),Y_name_entry.get(),X_min,X_max,Y_min,Y_max,X_axis_var.get(),Y_axis_var.get(),legend_var.get(),"temp.png",1000,element_names,element_points,element_lines)
+    #image = Image.open('temp.png')
+    #image.save(save_place, "PDF", resolution=100.0, quality=100)
+    #os.remove('temp.png')
+    graphedit.main(df,x_index,y_indexs,X_name_entry.get(),Y_name_entry.get(),X_min,X_max,Y_min,Y_max,X_axis_var.get(),Y_axis_var.get(),legend_var.get(),save_file_name,1000,element_names,element_points,element_lines)
+    os.rename(current_path, save_place)
 
 def save_as_png():
     save_file_name = save_name_entry.get()+'.png'
