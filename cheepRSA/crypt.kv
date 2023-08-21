@@ -1,0 +1,27 @@
+#:kivy 2.1.0
+Root:
+
+<Root>
+    BoxLayout:
+        orientation:'vertical'
+
+        StyledTextInput:
+            id:input1
+
+        Button:
+            id:button1
+            text:'encrypt&copy'
+            on_release:root.main_encrypt_copy()
+
+        Button:
+            id:button2
+            text:'decrypt'
+            on_release:root.main_decrypt()
+
+        Label:
+            id:label1
+            text:'result'
+
+<StyledTextInput>:
+    hint_text: 'Enter Text or Crypto'
+    font_size: 40
