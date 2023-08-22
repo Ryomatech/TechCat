@@ -2,26 +2,39 @@
 Root:
 
 <Root>
-    BoxLayout:
-        orientation:'vertical'
+    cols: 1
+    rows: 3
+
+    GridLayout:
+        cols: 2
+        rows: 1
 
         StyledTextInput:
             id:input1
+            focus: False
+    
+    GridLayout:
+        cols: 2
+        rows: 1
 
         Button:
             id:button1
-            text:'encrypt&copy'
+            text:'encrypto&copy'
             on_release:root.main_encrypt_copy()
 
         Button:
             id:button2
-            text:'decrypt'
+            text:'decrypto'
             on_release:root.main_decrypt()
 
+    GridLayout:
+        cols: 2
+        rows: 1
         Label:
             id:label1
             text:'result'
+            font_size: 40
 
 <StyledTextInput>:
-    hint_text: 'Enter Text or Crypto'
+    hint_text: 'Enter Text or Crypto (Please launch in English mode)'
     font_size: 40
